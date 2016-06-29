@@ -1,0 +1,55 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Specify minimum Vagrant version and Vagrant API version
+  Vagrant.require_version ">= 1.6.0"
+  VAGRANTFILE_API_VERSION = "2"
+
+  # Require YAML module
+  require 'yaml'
+
+  # Read YAML file with box details
+  servers = YAML.load_file('cluster.yml')
+
+  # Create boxes
+  Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+    # Iterate through entries in YAML file
+    servers.each do |server|
+      config.vm.define server["name"] do |srv|
+        srv.vm.box = "ubuntu/trusty64"
+        srv.vm.hostname = server["name"]
+
+        srv.vm.provider :virtualbox do |vb|
+          vb.memory = server["ram"]
+          vb.cpus = server["cpus"]
+        end
+
+        srv.vm.network "public_network", ip: server["ip"]
+	
+        srv.vm.synced_folder "../.", "/home/vagrant/project", :mount_options => ["dmode=700","fmode=600"]
+
+        srv.vm.provision "shell", path: "install-sshkey.sh"
+        srv.vm.provision "shell", path: "install-java.sh"
+
+        srv.vm.provision "shell" do |s|
+           update_hosts = ""
+           servers.each do |server2|
+              update_hosts = update_hosts + "echo '#{server2["ip"]} #{server2["name"]}'|tee --append /etc/hosts;"
+           end
+
+           s.inline = "rm /etc/hosts; touch /etc/hosts; #{update_hosts}"
+           s.privileged = true
+        end
+
+	if server["name"] == 'controlvm' 
+          srv.vm.provision "shell" do |s|
+            s.inline = "apt-add-repository ppa:ansible/ansible -y; apt-get update -y; apt-get install ansible -y;"
+            s.privileged = true
+          end
+        end
+    	
+      end
+    end
+  end
+

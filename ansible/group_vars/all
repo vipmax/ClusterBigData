@@ -1,0 +1,45 @@
+# Variables for all hosts
+
+iface: eth1
+
+# which version?
+java_version: 8
+
+# which subversion?
+java_subversion: 72
+
+# which directory to put the download file (for CentOS families)?
+java_download_path: /tmp
+
+# rpm/tar.gz file location:
+#   - true: download from Oracle on-the-fly;
+#   - false: copy from `{{ playbook_dir }}/files`.
+java_download_from_oracle: true
+
+# remove temporary downloaded files?
+java_remove_download: true
+
+
+master_ip: "{{ hostvars[groups['master'][0]]['ansible_' + iface]['ipv4']['address'] }}"
+master_hostname: "{{ hostvars[groups['master'][0]]['ansible_hostname'] }}"
+
+mesos_master_ip: "{{ hostvars[groups['mesos_masters'][0]]['ansible_' + iface]['ipv4']['address'] }}"
+mesos_master_hostname: "{{ hostvars[groups['mesos_masters'][0]]['ansible_hostname'] }}"
+
+hdfs_namenode_ip: "{{ hostvars[groups['hdfs_namenodes'][0]]['ansible_' + iface]['ipv4']['address'] }}"
+hdfs_namenode_hostname: "{{ hostvars[groups['hdfs_namenodes'][0]]['ansible_hostname'] }}"
+
+spark_master_ip: "{{ hostvars[groups['spark_masters'][0]]['ansible_' + iface]['ipv4']['address'] }}"
+spark_master_hostname: "{{ hostvars[groups['spark_masters'][0]]['ansible_hostname'] }}"
+
+clusteruser: "hadoop"
+clusteruser_home: "/home/hadoop"
+sshkeys_path: "../vms/sshkey"
+
+
+
+
+java_packages: oracle-java8-installer
+
+
+

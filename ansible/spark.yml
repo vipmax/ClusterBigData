@@ -1,0 +1,25 @@
+---
+
+- name: install java
+  hosts: all
+  sudo: yes
+  tags:
+    - prepare
+  roles:
+    - java
+
+
+- name: deploy standalone Spark
+  hosts: spark_masters
+  roles:
+    - { role: spark_standalone }
+  any_errors_fatal: yes
+
+
+
+- name: deploy Spark on Mesos
+  hosts: spark_masters
+  roles:
+    - { role: spark_mesos }
+  any_errors_fatal: yes
+
